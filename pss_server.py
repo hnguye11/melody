@@ -22,7 +22,7 @@ class Request():
         self.objid = objid
         self.fieldtype = fieldtype # p, q, v, angle, etc.
         self.value = value
-        self.event = Event()
+        self.event = Event()    # use to signal when read data is ready
 
     
     def to_string(self):
@@ -36,8 +36,10 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
         self.reqlock = Lock()   # thread-safe access to self.requests
         self.mp = MatPowerDriver("data")
         self.mp.open("data/case39")
-        open("data/request_order.txt", "w").close()
-        open("data/process_order.txt", "w").close()
+        self.processlogfile = "data/process_order.txt"
+        self.requestlogfile = "data/request_order.txt"
+        open(self.processlogfile, "w").close()
+        open(self.requestlogfile, "w").close()
 
         
     def read(self, request, context):
@@ -45,13 +47,13 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
                       request.objid, request.fieldtype)
 
         reqstr = req.to_string()
-        print "Read <%s> started!"%reqstr
+        logging.info("Read <%s> started."%reqstr)
 
         self.reqlock.acquire()
         
         try:
             self.requests.append(req)
-            openfile = open("data/request_order.txt", "a")
+            openfile = open(self.requestlogfile, "a")
             openfile.write(reqstr + "\n")
             openfile.close()
 
@@ -60,7 +62,7 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
 
         req.event.wait()
 
-        print "Read <%s> returns <%s>."%(reqstr, req.value)
+        logging.info("Read <%s> returns <%s>."%(reqstr, req.value))
         
         return pss_pb2.Response(value=req.value)
     
@@ -70,13 +72,13 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
                       request.objid, request.fieldtype, request.value)
 
         reqstr = req.to_string()
-        print "Write <%s> started!"%reqstr
+        logging.info("Write <%s> started."%reqstr)
 
         self.reqlock.acquire()
 
         try:
             self.requests.append(req)
-            openfile = open("data/request_order.txt", "a")
+            openfile = open(self.requestlogfile, "a")
             openfile.write(reqstr + "\n")
             openfile.close()
 
@@ -85,19 +87,19 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
 
         req.event.wait()
 
-        print "Write <%s> completed."%reqstr
+        logging.info("Write <%s> completed."%reqstr)
 
         return pss_pb2.Status(status=pss_pb2.SUCCEEDED)
 
     
     def process(self, request, context):
-        print "Process started with %d requests!"%len(self.requests)
-
         self.reqlock.acquire()
+        logging.info("Process started with <%d> requests."%len(self.requests))
+        
         try:
-            openfile = open("data/process_order.txt", "a")
-            openfile.write("%f,process\n"%time.time())
-
+            openfile = open(self.processlogfile, "a")
+            openfile.write("--------------------\n")
+            
             while len(self.requests) > 0:
                 # Pop the earliest request from request list
                 timestamps = [req.timestamp for req in self.requests]
@@ -116,17 +118,23 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
 
                 openfile.write(req.to_string() + "\n")
 
-        finally:
-            self.reqlock.release()
             openfile.close()
 
-        print "Process completed!"
+            openfile = open(self.requestlogfile, "a")
+            openfile.write("--------------------\n")
+            openfile.close()
+
+        finally:
+            self.reqlock.release()
+            
+        logging.info("Process completed.")
     
         return pss_pb2.Status(status=pss_pb2.SUCCEEDED)
         
     
 if __name__ == '__main__':
-    logging.basicConfig()
+    logging.basicConfig(level=logging.DEBUG)
+    # how many workers is sufficient?
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=20))
     pss_pb2_grpc.add_pssServicer_to_server(PSSServicer(), server)
     server.add_insecure_port('[::]:50051')

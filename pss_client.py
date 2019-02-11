@@ -15,7 +15,7 @@ def rpc_read(ts, objtype, objid, fieldtype):
         stub = pss_pb2_grpc.pssStub(channel)
         readRequest = pss_pb2.ReadRequest(timestamp=ts, objtype=objtype, objid=objid, fieldtype=fieldtype)
         response = stub.read(readRequest)
-        print response
+        logging.info("Read <%s> return <%s>"%(",".join([ts, objtype, objid, fieldtype]), response.value))
 
 
 def rpc_write(ts, objtype, objid, fieldtype, value):
@@ -23,18 +23,18 @@ def rpc_write(ts, objtype, objid, fieldtype, value):
         stub = pss_pb2_grpc.pssStub(channel)
         writeRequest = pss_pb2.WriteRequest(timestamp=ts, objtype=objtype, objid=objid, fieldtype=fieldtype, value=value)
         status = stub.write(writeRequest)
-        print status
+        logging.info("Write <%s> return <%s>"%(",".join([ts, objtype, objid, fieldtype, value]), status.status))
         
 
 def rpc_process():
     with grpc.insecure_channel('localhost:50051') as channel:
         stub = pss_pb2_grpc.pssStub(channel)
         status = stub.process(Empty())
-        print status
+        logging.info("Process return <%s>"%status.status)
 
 
 if __name__ == '__main__':
-    logging.basicConfig()
+    logging.basicConfig(level=logging.DEBUG)
     try:
         while True:
             choice = random.randint(0,2)
