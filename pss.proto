@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+
+
+service pss {
+  rpc read (ReadRequest) returns (Response) {}
+  rpc write (WriteRequest) returns (Status) {}
+  rpc process (google.protobuf.Empty) returns (Status) {}
+}
+
+enum StatusType {
+  UNKNOWN = 0;
+  SUCCEEDED = 1;
+  FAILED = 2;
+}
+
+message ReadRequest{
+  string timestamp = 1;
+  string objtype = 2;
+  string objid = 3;
+  string fieldtype = 4;
+}
+
+message Response {
+  string value = 1;
+}
+
+message WriteRequest {
+  string timestamp = 1;
+  string objtype = 2;
+  string objid = 3;
+  string fieldtype = 4;
+  string value = 5;
+}
+
+message Status{
+  StatusType status = 1;
+}
