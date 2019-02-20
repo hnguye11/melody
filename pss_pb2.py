@@ -18,16 +18,16 @@ from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='pss.proto',
-  package='',
-  syntax='proto3',
+  package='melody_powersim_proto',
+  syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n\tpss.proto\x1a\x1bgoogle/protobuf/empty.proto\"S\n\x0bReadRequest\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12\x0f\n\x07objtype\x18\x02 \x01(\t\x12\r\n\x05objid\x18\x03 \x01(\t\x12\x11\n\tfieldtype\x18\x04 \x01(\t\"\x19\n\x08Response\x12\r\n\x05value\x18\x01 \x01(\t\"c\n\x0cWriteRequest\x12\x11\n\ttimestamp\x18\x01 \x01(\t\x12\x0f\n\x07objtype\x18\x02 \x01(\t\x12\r\n\x05objid\x18\x03 \x01(\t\x12\x11\n\tfieldtype\x18\x04 \x01(\t\x12\r\n\x05value\x18\x05 \x01(\t\"%\n\x06Status\x12\x1b\n\x06status\x18\x01 \x01(\x0e\x32\x0b.StatusType*4\n\nStatusType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tSUCCEEDED\x10\x01\x12\n\n\x06\x46\x41ILED\x10\x02\x32y\n\x03pss\x12!\n\x04read\x12\x0c.ReadRequest\x1a\t.Response\"\x00\x12!\n\x05write\x12\r.WriteRequest\x1a\x07.Status\"\x00\x12,\n\x07process\x12\x16.google.protobuf.Empty\x1a\x07.Status\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\tpss.proto\x12\x15melody_powersim_proto\x1a\x1bgoogle/protobuf/empty.proto\"S\n\x0bReadRequest\x12\x11\n\ttimestamp\x18\x01 \x02(\t\x12\x0f\n\x07objtype\x18\x02 \x02(\t\x12\r\n\x05objid\x18\x03 \x02(\t\x12\x11\n\tfieldtype\x18\x04 \x02(\t\"\x19\n\x08Response\x12\r\n\x05value\x18\x01 \x02(\t\"c\n\x0cWriteRequest\x12\x11\n\ttimestamp\x18\x01 \x02(\t\x12\x0f\n\x07objtype\x18\x02 \x02(\t\x12\r\n\x05objid\x18\x03 \x02(\t\x12\x11\n\tfieldtype\x18\x04 \x02(\t\x12\r\n\x05value\x18\x05 \x02(\t\";\n\x06Status\x12\x31\n\x06status\x18\x01 \x02(\x0e\x32!.melody_powersim_proto.StatusType\" \n\x02KV\x12\x0b\n\x03key\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x01(\t\"\x84\x01\n\x0c\x43yberMessage\x12\x1a\n\x12\x64st_application_id\x18\x01 \x02(\t\x12\x1a\n\x12src_application_id\x18\x02 \x02(\t\x12\x10\n\x08msg_type\x18\x03 \x01(\t\x12*\n\x07\x63ontent\x18\x04 \x03(\x0b\x32\x19.melody_powersim_proto.KV*4\n\nStatusType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tSUCCEEDED\x10\x01\x12\n\n\x06\x46\x41ILED\x10\x02\x32\xe7\x01\n\x03pss\x12M\n\x04read\x12\".melody_powersim_proto.ReadRequest\x1a\x1f.melody_powersim_proto.Response\"\x00\x12M\n\x05write\x12#.melody_powersim_proto.WriteRequest\x1a\x1d.melody_powersim_proto.Status\"\x00\x12\x42\n\x07process\x12\x16.google.protobuf.Empty\x1a\x1d.melody_powersim_proto.Status\"\x00')
   ,
   dependencies=[google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,])
 
 _STATUSTYPE = _descriptor.EnumDescriptor(
   name='StatusType',
-  full_name='StatusType',
+  full_name='melody_powersim_proto.StatusType',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -46,8 +46,8 @@ _STATUSTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=294,
-  serialized_end=346,
+  serialized_start=508,
+  serialized_end=560,
 )
 _sym_db.RegisterEnumDescriptor(_STATUSTYPE)
 
@@ -60,35 +60,35 @@ FAILED = 2
 
 _READREQUEST = _descriptor.Descriptor(
   name='ReadRequest',
-  full_name='ReadRequest',
+  full_name='melody_powersim_proto.ReadRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='timestamp', full_name='ReadRequest.timestamp', index=0,
-      number=1, type=9, cpp_type=9, label=1,
+      name='timestamp', full_name='melody_powersim_proto.ReadRequest.timestamp', index=0,
+      number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='objtype', full_name='ReadRequest.objtype', index=1,
-      number=2, type=9, cpp_type=9, label=1,
+      name='objtype', full_name='melody_powersim_proto.ReadRequest.objtype', index=1,
+      number=2, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='objid', full_name='ReadRequest.objid', index=2,
-      number=3, type=9, cpp_type=9, label=1,
+      name='objid', full_name='melody_powersim_proto.ReadRequest.objid', index=2,
+      number=3, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='fieldtype', full_name='ReadRequest.fieldtype', index=3,
-      number=4, type=9, cpp_type=9, label=1,
+      name='fieldtype', full_name='melody_powersim_proto.ReadRequest.fieldtype', index=3,
+      number=4, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -101,25 +101,25 @@ _READREQUEST = _descriptor.Descriptor(
   ],
   serialized_options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=42,
-  serialized_end=125,
+  serialized_start=65,
+  serialized_end=148,
 )
 
 
 _RESPONSE = _descriptor.Descriptor(
   name='Response',
-  full_name='Response',
+  full_name='melody_powersim_proto.Response',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='value', full_name='Response.value', index=0,
-      number=1, type=9, cpp_type=9, label=1,
+      name='value', full_name='melody_powersim_proto.Response.value', index=0,
+      number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -132,53 +132,53 @@ _RESPONSE = _descriptor.Descriptor(
   ],
   serialized_options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=127,
-  serialized_end=152,
+  serialized_start=150,
+  serialized_end=175,
 )
 
 
 _WRITEREQUEST = _descriptor.Descriptor(
   name='WriteRequest',
-  full_name='WriteRequest',
+  full_name='melody_powersim_proto.WriteRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='timestamp', full_name='WriteRequest.timestamp', index=0,
-      number=1, type=9, cpp_type=9, label=1,
+      name='timestamp', full_name='melody_powersim_proto.WriteRequest.timestamp', index=0,
+      number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='objtype', full_name='WriteRequest.objtype', index=1,
-      number=2, type=9, cpp_type=9, label=1,
+      name='objtype', full_name='melody_powersim_proto.WriteRequest.objtype', index=1,
+      number=2, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='objid', full_name='WriteRequest.objid', index=2,
-      number=3, type=9, cpp_type=9, label=1,
+      name='objid', full_name='melody_powersim_proto.WriteRequest.objid', index=2,
+      number=3, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='fieldtype', full_name='WriteRequest.fieldtype', index=3,
-      number=4, type=9, cpp_type=9, label=1,
+      name='fieldtype', full_name='melody_powersim_proto.WriteRequest.fieldtype', index=3,
+      number=4, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='value', full_name='WriteRequest.value', index=4,
-      number=5, type=9, cpp_type=9, label=1,
+      name='value', full_name='melody_powersim_proto.WriteRequest.value', index=4,
+      number=5, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -191,25 +191,25 @@ _WRITEREQUEST = _descriptor.Descriptor(
   ],
   serialized_options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=154,
-  serialized_end=253,
+  serialized_start=177,
+  serialized_end=276,
 )
 
 
 _STATUS = _descriptor.Descriptor(
   name='Status',
-  full_name='Status',
+  full_name='melody_powersim_proto.Status',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='status', full_name='Status.status', index=0,
-      number=1, type=14, cpp_type=8, label=1,
+      name='status', full_name='melody_powersim_proto.Status.status', index=0,
+      number=1, type=14, cpp_type=8, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -222,64 +222,171 @@ _STATUS = _descriptor.Descriptor(
   ],
   serialized_options=None,
   is_extendable=False,
-  syntax='proto3',
+  syntax='proto2',
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=255,
-  serialized_end=292,
+  serialized_start=278,
+  serialized_end=337,
+)
+
+
+_KV = _descriptor.Descriptor(
+  name='KV',
+  full_name='melody_powersim_proto.KV',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='melody_powersim_proto.KV.key', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='value', full_name='melody_powersim_proto.KV.value', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=339,
+  serialized_end=371,
+)
+
+
+_CYBERMESSAGE = _descriptor.Descriptor(
+  name='CyberMessage',
+  full_name='melody_powersim_proto.CyberMessage',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='dst_application_id', full_name='melody_powersim_proto.CyberMessage.dst_application_id', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='src_application_id', full_name='melody_powersim_proto.CyberMessage.src_application_id', index=1,
+      number=2, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='msg_type', full_name='melody_powersim_proto.CyberMessage.msg_type', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='content', full_name='melody_powersim_proto.CyberMessage.content', index=3,
+      number=4, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto2',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=374,
+  serialized_end=506,
 )
 
 _STATUS.fields_by_name['status'].enum_type = _STATUSTYPE
+_CYBERMESSAGE.fields_by_name['content'].message_type = _KV
 DESCRIPTOR.message_types_by_name['ReadRequest'] = _READREQUEST
 DESCRIPTOR.message_types_by_name['Response'] = _RESPONSE
 DESCRIPTOR.message_types_by_name['WriteRequest'] = _WRITEREQUEST
 DESCRIPTOR.message_types_by_name['Status'] = _STATUS
+DESCRIPTOR.message_types_by_name['KV'] = _KV
+DESCRIPTOR.message_types_by_name['CyberMessage'] = _CYBERMESSAGE
 DESCRIPTOR.enum_types_by_name['StatusType'] = _STATUSTYPE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 ReadRequest = _reflection.GeneratedProtocolMessageType('ReadRequest', (_message.Message,), dict(
   DESCRIPTOR = _READREQUEST,
   __module__ = 'pss_pb2'
-  # @@protoc_insertion_point(class_scope:ReadRequest)
+  # @@protoc_insertion_point(class_scope:melody_powersim_proto.ReadRequest)
   ))
 _sym_db.RegisterMessage(ReadRequest)
 
 Response = _reflection.GeneratedProtocolMessageType('Response', (_message.Message,), dict(
   DESCRIPTOR = _RESPONSE,
   __module__ = 'pss_pb2'
-  # @@protoc_insertion_point(class_scope:Response)
+  # @@protoc_insertion_point(class_scope:melody_powersim_proto.Response)
   ))
 _sym_db.RegisterMessage(Response)
 
 WriteRequest = _reflection.GeneratedProtocolMessageType('WriteRequest', (_message.Message,), dict(
   DESCRIPTOR = _WRITEREQUEST,
   __module__ = 'pss_pb2'
-  # @@protoc_insertion_point(class_scope:WriteRequest)
+  # @@protoc_insertion_point(class_scope:melody_powersim_proto.WriteRequest)
   ))
 _sym_db.RegisterMessage(WriteRequest)
 
 Status = _reflection.GeneratedProtocolMessageType('Status', (_message.Message,), dict(
   DESCRIPTOR = _STATUS,
   __module__ = 'pss_pb2'
-  # @@protoc_insertion_point(class_scope:Status)
+  # @@protoc_insertion_point(class_scope:melody_powersim_proto.Status)
   ))
 _sym_db.RegisterMessage(Status)
+
+KV = _reflection.GeneratedProtocolMessageType('KV', (_message.Message,), dict(
+  DESCRIPTOR = _KV,
+  __module__ = 'pss_pb2'
+  # @@protoc_insertion_point(class_scope:melody_powersim_proto.KV)
+  ))
+_sym_db.RegisterMessage(KV)
+
+CyberMessage = _reflection.GeneratedProtocolMessageType('CyberMessage', (_message.Message,), dict(
+  DESCRIPTOR = _CYBERMESSAGE,
+  __module__ = 'pss_pb2'
+  # @@protoc_insertion_point(class_scope:melody_powersim_proto.CyberMessage)
+  ))
+_sym_db.RegisterMessage(CyberMessage)
 
 
 
 _PSS = _descriptor.ServiceDescriptor(
   name='pss',
-  full_name='pss',
+  full_name='melody_powersim_proto.pss',
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=348,
-  serialized_end=469,
+  serialized_start=563,
+  serialized_end=794,
   methods=[
   _descriptor.MethodDescriptor(
     name='read',
-    full_name='pss.read',
+    full_name='melody_powersim_proto.pss.read',
     index=0,
     containing_service=None,
     input_type=_READREQUEST,
@@ -288,7 +395,7 @@ _PSS = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='write',
-    full_name='pss.write',
+    full_name='melody_powersim_proto.pss.write',
     index=1,
     containing_service=None,
     input_type=_WRITEREQUEST,
@@ -297,7 +404,7 @@ _PSS = _descriptor.ServiceDescriptor(
   ),
   _descriptor.MethodDescriptor(
     name='process',
-    full_name='pss.process',
+    full_name='melody_powersim_proto.pss.process',
     index=2,
     containing_service=None,
     input_type=google_dot_protobuf_dot_empty__pb2._EMPTY,

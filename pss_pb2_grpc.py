@@ -16,17 +16,17 @@ class pssStub(object):
       channel: A grpc.Channel.
     """
     self.read = channel.unary_unary(
-        '/pss/read',
+        '/melody_powersim_proto.pss/read',
         request_serializer=pss__pb2.ReadRequest.SerializeToString,
         response_deserializer=pss__pb2.Response.FromString,
         )
     self.write = channel.unary_unary(
-        '/pss/write',
+        '/melody_powersim_proto.pss/write',
         request_serializer=pss__pb2.WriteRequest.SerializeToString,
         response_deserializer=pss__pb2.Status.FromString,
         )
     self.process = channel.unary_unary(
-        '/pss/process',
+        '/melody_powersim_proto.pss/process',
         request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
         response_deserializer=pss__pb2.Status.FromString,
         )
@@ -77,5 +77,5 @@ def add_pssServicer_to_server(servicer, server):
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
-      'pss', rpc_method_handlers)
+      'melody_powersim_proto.pss', rpc_method_handlers)
   server.add_generic_rpc_handlers((generic_handler,))

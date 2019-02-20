@@ -135,7 +135,7 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     # how many workers is sufficient?
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=20))
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=1000))
     pss_pb2_grpc.add_pssServicer_to_server(PSSServicer(), server)
     server.add_insecure_port('[::]:50051')
     server.start()
