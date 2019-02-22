@@ -14,15 +14,11 @@ READ = "read"
 WRITE = "write"
 
 
-class Request():
-    def __init__(self, timestamp, reqtype, objtype, objid, fieldtype, value=""):
-        self.timestamp = timestamp
-        self.reqtype = reqtype  # either READ or WRITE
-        self.objtype = objtype  # gen, bus, load, etc.
-        self.objid = objid
-        self.fieldtype = fieldtype # p, q, v, angle, etc.
-        self.value = value
-        self.event = Event()    # use to signal when read data is ready
+class Job():
+    def __init__(self, request, reply, event):
+        self.request = request
+        self.reply = reply
+        self.event = event
 
     
     def to_string(self):
@@ -32,104 +28,141 @@ class Request():
 
 class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
     def __init__(self):
-        self.requests = []
-        self.reqlock = Lock()   # thread-safe access to self.requests
+        self.jobs = []
+        self.jobLock = Lock()   # thread-safe access to job list
         self.mp = MatPowerDriver("data")
         self.mp.open("data/case39")
-        self.processlogfile = "data/process_order.txt"
-        self.requestlogfile = "data/request_order.txt"
-        open(self.processlogfile, "w").close()
-        open(self.requestlogfile, "w").close()
+        self.rlog = logging.getLogger("request_order")
+        self.plog = logging.getLogger("process_order")
 
         
-    def read(self, request, context):
-        req = Request(request.timestamp, READ, request.objtype,
-                      request.objid, request.fieldtype)
+    def read(self, readRequest, context):
+        self.rlog.info("%s %s"%(readRequest.timestamp, "Read"))
 
-        reqstr = req.to_string()
-        logging.info("Read <%s> started."%reqstr)
-
-        self.reqlock.acquire()
+        event = Event()
+        job = Job(readRequest, None, event)
         
+        self.jobLock.acquire()
         try:
-            self.requests.append(req)
-            openfile = open(self.requestlogfile, "a")
-            openfile.write(reqstr + "\n")
-            openfile.close()
-
+            self.jobs.append(job)
         finally:
-            self.reqlock.release()
+            self.jobLock.release()
 
-        req.event.wait()
-
-        logging.info("Read <%s> returns <%s>."%(reqstr, req.value))
+        event.wait()
+        readResponse = job.reply
         
-        return pss_pb2.Response(value=req.value)
+        return readResponse
     
+        
+    def write(self, writeRequest, context):
+        self.rlog.info("%s %s"%(writeRequest.timestamp, "Write"))
 
-    def write(self, request, context):
-        req = Request(request.timestamp, WRITE, request.objtype,
-                      request.objid, request.fieldtype, request.value)
-
-        reqstr = req.to_string()
-        logging.info("Write <%s> started."%reqstr)
-
-        self.reqlock.acquire()
-
+        event = Event()
+        job = Job(writeRequest, None, event)
+        
+        self.jobLock.acquire()            
         try:
-            self.requests.append(req)
-            openfile = open(self.requestlogfile, "a")
-            openfile.write(reqstr + "\n")
-            openfile.close()
-
+            self.jobs.append(job)
         finally:
-            self.reqlock.release()
+            self.jobLock.release()
 
-        req.event.wait()
-
-        logging.info("Write <%s> completed."%reqstr)
-
-        return pss_pb2.Status(status=pss_pb2.SUCCEEDED)
-
+        event.wait()
+        writeStatus = job.reply
+        
+        return writeStatus
+        
     
     def process(self, request, context):
-        self.reqlock.acquire()
-        logging.info("Process started with <%d> requests."%len(self.requests))
+        self.jobLock.acquire()
+        self.rlog.info("Process id=%s"%request.id)
+        
+        status = pss_pb2.Status()
+        status.id = request.id
+
+        self.plog.info("Start batch processing")
         
         try:
-            openfile = open(self.processlogfile, "a")
-            openfile.write("--------------------\n")
-            
-            while len(self.requests) > 0:
-                # Pop the earliest request from request list
-                timestamps = [req.timestamp for req in self.requests]
+            while len(self.jobs) > 0:
+                # Pop the earliest job from job list
+                timestamps = [job.request.timestamp for job in self.jobs]
                 idx = timestamps.index(min(timestamps))
-                req = self.requests.pop(idx)
+                job = self.jobs.pop(idx)
+                request = job.request
+                
+                self.plog.info("timestamp=%s, type=%s"%(request.timestamp, type(request)))
+                
+                if type(request) == pss_pb2.ReadRequest:
+                    readResponse = pss_pb2.ReadResponse()
+                    
+                    for req in request.request:
+                        res = readResponse.response.add()
+                        res.id = req.id
+                        res.value = self.mp.read(req.objtype, req.objid, req.fieldtype)
+                        self.plog.info("READ <%s,%s,%s,%s> returns <%s>"%(req.id, req.objtype, req.objid, req.fieldtype, res.value))
+                    
+                    job.reply = readResponse
+                    job.event.set()
 
-                # Process the request
-                if req.reqtype == READ:
-                    req.value = self.mp.read(req.objtype, req.objid, req.fieldtype)
-                    req.event.set()
-
-                elif req.reqtype == WRITE:
-                    self.mp.write(req.objtype, req.objid, req.fieldtype, req.value)
+                elif type(request) == pss_pb2.WriteRequest:
+                    writelist = [(req.objtype, req.objid, req.fieldtype, req.value) for req in request.request]
+                    self.mp.write_multiple(writelist)
                     self.mp.run_pf()
-                    req.event.set()
-
-                openfile.write(req.to_string() + "\n")
-
-            openfile.close()
-
-            openfile = open(self.requestlogfile, "a")
-            openfile.write("--------------------\n")
-            openfile.close()
+                    
+                    writeStatus = pss_pb2.WriteStatus()
+                    
+                    for req in request.request:
+                        res = writeStatus.status.add()
+                        res.id = req.id
+                        res.status = pss_pb2.SUCCEEDED # TODO: get write status from pss
+                        self.plog.info("WRITE <%s,%s,%s,%s,%s> returns <%s>"%(req.id, req.objtype, req.objid, req.fieldtype, req.value, res.status))
+                    
+                    job.reply = writeStatus
+                    job.event.set()
 
         finally:
-            self.reqlock.release()
+            self.jobLock.release()
+            self.plog.info("Stop batch processing")
             
-        logging.info("Process completed.")
+            status.status = pss_pb2.SUCCEEDED
+            return status
+
+        # self.reqlock.acquire()
+        # logging.info("Process started with <%d> requests."%len(self.requests))
+        
+        # try:
+        #     openfile = open(self.processlogfile, "a")
+        #     openfile.write("--------------------\n")
+            
+        #     while len(self.requests) > 0:
+        #         # Pop the earliest request from request list
+        #         timestamps = [req.timestamp for req in self.requests]
+        #         idx = timestamps.index(min(timestamps))
+        #         req = self.requests.pop(idx)
+
+        #         # Process the request
+        #         if req.reqtype == READ:
+        #             req.value = self.mp.read(req.objtype, req.objid, req.fieldtype)
+        #             req.event.set()
+
+        #         elif req.reqtype == WRITE:
+        #             self.mp.write(req.objtype, req.objid, req.fieldtype, req.value)
+        #             self.mp.run_pf()
+        #             req.event.set()
+
+        #         openfile.write(req.to_string() + "\n")
+
+        #     openfile.close()
+
+        #     openfile = open(self.requestlogfile, "a")
+        #     openfile.write("--------------------\n")
+        #     openfile.close()
+
+        # finally:
+        #     self.reqlock.release()
+            
+        # logging.info("Process completed.")
     
-        return pss_pb2.Status(status=pss_pb2.SUCCEEDED)
+        # return pss_pb2.Status(status=pss_pb2.SUCCEEDED)
         
     
 if __name__ == '__main__':

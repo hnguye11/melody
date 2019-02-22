@@ -1,3 +1,4 @@
+from __future__ import division
 import logging
 import grpc
 import time
@@ -5,57 +6,78 @@ import random
 from google.protobuf.empty_pb2 import Empty
 import threading
 import logging
+from config import *
 
 import pss_pb2
 import pss_pb2_grpc
 
 
-def rpc_read(ts, objtype, objid, fieldtype):
-    with grpc.insecure_channel('localhost:50051') as channel:
-        stub = pss_pb2_grpc.pssStub(channel)
-        readRequest = pss_pb2.ReadRequest(timestamp=ts, objtype=objtype, objid=objid, fieldtype=fieldtype)
-        response = stub.read(readRequest)
-        logging.info("Read <%s> return <%s>"%(",".join([ts, objtype, objid, fieldtype]), response.value))
+def getid():
+    return str(hash(time.time() + random.random()))
 
 
-def rpc_write(ts, objtype, objid, fieldtype, value):
-    with grpc.insecure_channel('localhost:50051') as channel:
-        stub = pss_pb2_grpc.pssStub(channel)
-        writeRequest = pss_pb2.WriteRequest(timestamp=ts, objtype=objtype, objid=objid, fieldtype=fieldtype, value=value)
-        status = stub.write(writeRequest)
-        logging.info("Write <%s> return <%s>"%(",".join([ts, objtype, objid, fieldtype, value]), status.status))
-        
+def rpc_read(readlist):
+    channel = grpc.insecure_channel('localhost:50051')
+    stub = pss_pb2_grpc.pssStub(channel)
+    readRequest = pss_pb2.ReadRequest(timestamp=str(time.time()))
+
+    for objtype, objid, fieldtype in readlist:
+        req = readRequest.request.add()
+        req.id = getid()
+        req.objtype = objtype  
+        req.objid = objid
+        req.fieldtype = fieldtype
+        req.value = ""
+
+    readResponse = stub.read(readRequest)
+    for res in readResponse.response:
+        print res.id, res.value
+
+
+def rpc_write(writelist):
+    channel = grpc.insecure_channel('localhost:50051')
+    stub = pss_pb2_grpc.pssStub(channel)
+    writeRequest = pss_pb2.WriteRequest(timestamp=str(time.time()))
+
+    for objtype, objid, fieldtype, value in writelist:
+        req = writeRequest.request.add()
+        req.id = getid()
+        req.objtype = objtype  
+        req.objid = objid
+        req.fieldtype = fieldtype
+        req.value = value
+
+    writeStatus = stub.write(writeRequest)
+    for stt in writeStatus.status:
+        print stt.id, stt.status
+            
 
 def rpc_process():
     with grpc.insecure_channel('localhost:50051') as channel:
         stub = pss_pb2_grpc.pssStub(channel)
-        status = stub.process(Empty())
-        logging.info("Process return <%s>"%status.status)
+        request = pss_pb2.ProcessRequest(id=getid())
+        status = stub.process(request)
+        print status.id, status.status
 
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     try:
-        while True:
-            choice = random.randint(0,2)
-            ts = str(time.time() + 4 * (0.5 - random.random()))
-
+        for choice in [0,1,0,2]:
+            time.sleep(0.5)
             if choice == 0:
-                # busid = str(random.randint(1,39))
-                busid = "1"
-                threading.Thread(target=rpc_read, args=(ts,"bus",busid,"v",)).start()
+                # readlist = [("bus", str(bus), "Vm") for bus in PILOT_BUS]
+                readlist = [("gen", str(gen), "Vg") for gen in GEN]
+                threading.Thread(target=rpc_read, args=(readlist,)).start()
 
             elif choice == 1:
-                # genid = str(random.randint(30,39))
-                genid = "30"
-                genv = str(1 + 0.1 * random.random())
-                threading.Thread(target=rpc_write, args=(ts,"gen",genid,"v",genv,)).start()
+                writelist = [("gen", str(gen), "Vg", "1.0") for gen in GEN]
+                threading.Thread(target=rpc_write, args=(writelist,)).start()
 
-            else:
+            elif choice == 2:
                 threading.Thread(target=rpc_process).start()
 
-            time.sleep(1)
-
+        
     except KeyboardInterrupt:
         exit()
 
