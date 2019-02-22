@@ -10,10 +10,6 @@ import pss_pb2_grpc
 from pss_driver import MatPowerDriver
 
 
-READ = "read"
-WRITE = "write"
-
-
 class Job():
     def __init__(self, request, reply, event):
         self.request = request
@@ -22,9 +18,9 @@ class Job():
 
     
     def to_string(self):
-        return ",".join([self.timestamp, self.reqtype, self.objtype,
-                         self.objid, self.fieldtype, self.value])
-
+        # TODO: implement
+        return ""
+    
 
 class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
     def __init__(self):
@@ -37,7 +33,7 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
 
         
     def read(self, readRequest, context):
-        self.rlog.info("%s %s"%(readRequest.timestamp, "Read"))
+        self.rlog.info("%f %s"%(readRequest.timestamp, "Read"))
 
         event = Event()
         job = Job(readRequest, None, event)
@@ -55,7 +51,7 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
     
         
     def write(self, writeRequest, context):
-        self.rlog.info("%s %s"%(writeRequest.timestamp, "Write"))
+        self.rlog.info("%f %s"%(writeRequest.timestamp, "Write"))
 
         event = Event()
         job = Job(writeRequest, None, event)
@@ -89,7 +85,7 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
                 job = self.jobs.pop(idx)
                 request = job.request
                 
-                self.plog.info("timestamp=%s, type=%s"%(request.timestamp, type(request)))
+                self.plog.info("timestamp=%f, type=%s"%(request.timestamp, type(request)))
                 
                 if type(request) == pss_pb2.ReadRequest:
                     readResponse = pss_pb2.ReadResponse()
@@ -125,44 +121,6 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
             
             status.status = pss_pb2.SUCCEEDED
             return status
-
-        # self.reqlock.acquire()
-        # logging.info("Process started with <%d> requests."%len(self.requests))
-        
-        # try:
-        #     openfile = open(self.processlogfile, "a")
-        #     openfile.write("--------------------\n")
-            
-        #     while len(self.requests) > 0:
-        #         # Pop the earliest request from request list
-        #         timestamps = [req.timestamp for req in self.requests]
-        #         idx = timestamps.index(min(timestamps))
-        #         req = self.requests.pop(idx)
-
-        #         # Process the request
-        #         if req.reqtype == READ:
-        #             req.value = self.mp.read(req.objtype, req.objid, req.fieldtype)
-        #             req.event.set()
-
-        #         elif req.reqtype == WRITE:
-        #             self.mp.write(req.objtype, req.objid, req.fieldtype, req.value)
-        #             self.mp.run_pf()
-        #             req.event.set()
-
-        #         openfile.write(req.to_string() + "\n")
-
-        #     openfile.close()
-
-        #     openfile = open(self.requestlogfile, "a")
-        #     openfile.write("--------------------\n")
-        #     openfile.close()
-
-        # finally:
-        #     self.reqlock.release()
-            
-        # logging.info("Process completed.")
-    
-        # return pss_pb2.Status(status=pss_pb2.SUCCEEDED)
         
     
 if __name__ == '__main__':

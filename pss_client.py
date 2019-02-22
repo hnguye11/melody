@@ -19,7 +19,7 @@ def getid():
 def rpc_read(readlist):
     channel = grpc.insecure_channel('localhost:50051')
     stub = pss_pb2_grpc.pssStub(channel)
-    readRequest = pss_pb2.ReadRequest(timestamp=str(time.time()))
+    readRequest = pss_pb2.ReadRequest(timestamp=time.time())
 
     for objtype, objid, fieldtype in readlist:
         req = readRequest.request.add()
@@ -37,7 +37,7 @@ def rpc_read(readlist):
 def rpc_write(writelist):
     channel = grpc.insecure_channel('localhost:50051')
     stub = pss_pb2_grpc.pssStub(channel)
-    writeRequest = pss_pb2.WriteRequest(timestamp=str(time.time()))
+    writeRequest = pss_pb2.WriteRequest(timestamp=time.time())
 
     for objtype, objid, fieldtype, value in writelist:
         req = writeRequest.request.add()

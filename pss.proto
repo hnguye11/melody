@@ -1,3 +1,6 @@
+// Protocol buffer for interacting with the power system simulation
+// Proxy implements as GRPC server
+
 syntax = "proto2";
 //import "google/protobuf/empty.proto";
 
@@ -32,7 +35,7 @@ message Request {
 }
 
 message ReadRequest {
-  required string timestamp = 1;
+  required float timestamp = 1;
   repeated Request request = 2;
 }
 
@@ -41,7 +44,7 @@ message ReadResponse {
 }
 
 message WriteRequest {
-  required string timestamp = 1;
+  required float timestamp = 1;
   repeated Request request = 2;
 }
 
@@ -50,5 +53,5 @@ message WriteStatus {
 }
 
 message ProcessRequest {
-  required string id = 2;
+  required string id = 1;
 }
