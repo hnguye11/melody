@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto2',
   serialized_options=None,
-  serialized_pb=_b('\n\tpss.proto\"1\n\x06Status\x12\n\n\x02id\x18\x01 \x02(\t\x12\x1b\n\x06status\x18\x02 \x02(\x0e\x32\x0b.StatusType\"%\n\x08Response\x12\n\n\x02id\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\t\"W\n\x07Request\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0f\n\x07objtype\x18\x02 \x02(\t\x12\r\n\x05objid\x18\x03 \x02(\t\x12\x11\n\tfieldtype\x18\x04 \x02(\t\x12\r\n\x05value\x18\x05 \x02(\t\";\n\x0bReadRequest\x12\x11\n\ttimestamp\x18\x01 \x02(\x02\x12\x19\n\x07request\x18\x02 \x03(\x0b\x32\x08.Request\"+\n\x0cReadResponse\x12\x1b\n\x08response\x18\x01 \x03(\x0b\x32\t.Response\"<\n\x0cWriteRequest\x12\x11\n\ttimestamp\x18\x01 \x02(\x02\x12\x19\n\x07request\x18\x02 \x03(\x0b\x32\x08.Request\"&\n\x0bWriteStatus\x12\x17\n\x06status\x18\x01 \x03(\x0b\x32\x07.Status\"\x1c\n\x0eProcessRequest\x12\n\n\x02id\x18\x01 \x02(\t*4\n\nStatusType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tSUCCEEDED\x10\x01\x12\n\n\x06\x46\x41ILED\x10\x02\x32{\n\x03pss\x12%\n\x04read\x12\x0c.ReadRequest\x1a\r.ReadResponse\"\x00\x12&\n\x05write\x12\r.WriteRequest\x1a\x0c.WriteStatus\"\x00\x12%\n\x07process\x12\x0f.ProcessRequest\x1a\x07.Status\"\x00')
+  serialized_pb=_b('\n\tpss.proto\"1\n\x06Status\x12\n\n\x02id\x18\x01 \x02(\t\x12\x1b\n\x06status\x18\x02 \x02(\x0e\x32\x0b.StatusType\"%\n\x08Response\x12\n\n\x02id\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\t\"W\n\x07Request\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0f\n\x07objtype\x18\x02 \x02(\t\x12\r\n\x05objid\x18\x03 \x02(\t\x12\x11\n\tfieldtype\x18\x04 \x02(\t\x12\r\n\x05value\x18\x05 \x02(\t\";\n\x0bReadRequest\x12\x11\n\ttimestamp\x18\x01 \x02(\t\x12\x19\n\x07request\x18\x02 \x03(\x0b\x32\x08.Request\"+\n\x0cReadResponse\x12\x1b\n\x08response\x18\x01 \x03(\x0b\x32\t.Response\"<\n\x0cWriteRequest\x12\x11\n\ttimestamp\x18\x01 \x02(\t\x12\x19\n\x07request\x18\x02 \x03(\x0b\x32\x08.Request\"&\n\x0bWriteStatus\x12\x17\n\x06status\x18\x01 \x03(\x0b\x32\x07.Status\"\x1c\n\x0eProcessRequest\x12\n\n\x02id\x18\x01 \x02(\t*4\n\nStatusType\x12\x0b\n\x07UNKNOWN\x10\x00\x12\r\n\tSUCCEEDED\x10\x01\x12\n\n\x06\x46\x41ILED\x10\x02\x32{\n\x03pss\x12%\n\x04read\x12\x0c.ReadRequest\x1a\r.ReadResponse\"\x00\x12&\n\x05write\x12\r.WriteRequest\x1a\x0c.WriteStatus\"\x00\x12%\n\x07process\x12\x0f.ProcessRequest\x1a\x07.Status\"\x00')
 )
 
 _STATUSTYPE = _descriptor.EnumDescriptor(
@@ -200,8 +200,8 @@ _READREQUEST = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='ReadRequest.timestamp', index=0,
-      number=1, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=float(0),
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -269,8 +269,8 @@ _WRITEREQUEST = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='timestamp', full_name='WriteRequest.timestamp', index=0,
-      number=1, type=2, cpp_type=6, label=2,
-      has_default_value=False, default_value=float(0),
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),

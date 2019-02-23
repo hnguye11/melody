@@ -35,7 +35,7 @@ message Request {
 }
 
 message ReadRequest {
-  required float timestamp = 1;
+  required string timestamp = 1;
   repeated Request request = 2;
 }
 
@@ -44,7 +44,7 @@ message ReadResponse {
 }
 
 message WriteRequest {
-  required float timestamp = 1;
+  required string timestamp = 1;
   repeated Request request = 2;
 }
 

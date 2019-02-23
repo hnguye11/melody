@@ -9,6 +9,8 @@ import pss_pb2_grpc
 
 from pss_driver import MatPowerDriver
 
+REQUEST_LOG = "RLOG"
+PROCESS_LOG = "PLOG"
 
 class Job():
     def __init__(self, request, reply, event):
@@ -23,22 +25,22 @@ class Job():
     
 
 class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
-    def __init__(self):
+    def __init__(self, workingdir="", case=""):
         self.jobs = []
         self.jobLock = Lock()   # thread-safe access to job list
-        self.mp = MatPowerDriver("data")
-        self.mp.open("data/case39")
-        self.rlog = logging.getLogger("request_order")
-        self.plog = logging.getLogger("process_order")
+        self.mp = MatPowerDriver(workingdir)
+        self.mp.open(case)
+        self.rlog = logging.getLogger(REQUEST_LOG)
+        self.plog = logging.getLogger(PROCESS_LOG)
 
         
     def read(self, readRequest, context):
-        self.rlog.info("%f %s"%(readRequest.timestamp, "Read"))
-
+        self.jobLock.acquire()        
+        for req in readRequest.request:
+            self.rlog.info("%s,READ,%s,%s,%s,%s"%(readRequest.timestamp, req.id, req.objtype, req.objid, req.fieldtype))
         event = Event()
         job = Job(readRequest, None, event)
         
-        self.jobLock.acquire()
         try:
             self.jobs.append(job)
         finally:
@@ -51,12 +53,12 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
     
         
     def write(self, writeRequest, context):
-        self.rlog.info("%f %s"%(writeRequest.timestamp, "Write"))
-
+        self.jobLock.acquire()
+        for req in writeRequest.request:
+            self.rlog.info("%s,WRITE,%s,%s,%s,%s,%s"%(writeRequest.timestamp, req.id, req.objtype, req.objid, req.fieldtype, req.value))
         event = Event()
         job = Job(writeRequest, None, event)
-        
-        self.jobLock.acquire()            
+
         try:
             self.jobs.append(job)
         finally:
@@ -70,22 +72,18 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
     
     def process(self, request, context):
         self.jobLock.acquire()
-        self.rlog.info("Process id=%s"%request.id)
+        self.plog.info("--------------------")
         
         status = pss_pb2.Status()
         status.id = request.id
-
-        self.plog.info("Start batch processing")
         
         try:
             while len(self.jobs) > 0:
                 # Pop the earliest job from job list
-                timestamps = [job.request.timestamp for job in self.jobs]
+                timestamps = [float(job.request.timestamp) for job in self.jobs]
                 idx = timestamps.index(min(timestamps))
                 job = self.jobs.pop(idx)
                 request = job.request
-                
-                self.plog.info("timestamp=%f, type=%s"%(request.timestamp, type(request)))
                 
                 if type(request) == pss_pb2.ReadRequest:
                     readResponse = pss_pb2.ReadResponse()
@@ -94,7 +92,7 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
                         res = readResponse.response.add()
                         res.id = req.id
                         res.value = self.mp.read(req.objtype, req.objid, req.fieldtype)
-                        self.plog.info("READ <%s,%s,%s,%s> returns <%s>"%(req.id, req.objtype, req.objid, req.fieldtype, res.value))
+                        self.plog.info("%s,READ,%s,%s,%s,%s,%s"%(request.timestamp, req.id, req.objtype, req.objid, req.fieldtype, res.value))
                     
                     job.reply = readResponse
                     job.event.set()
@@ -110,24 +108,23 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
                         res = writeStatus.status.add()
                         res.id = req.id
                         res.status = pss_pb2.SUCCEEDED # TODO: get write status from pss
-                        self.plog.info("WRITE <%s,%s,%s,%s,%s> returns <%s>"%(req.id, req.objtype, req.objid, req.fieldtype, req.value, res.status))
+                        self.plog.info("%s,WRITE,%s,%s,%s,%s,%s,%s"%(request.timestamp, req.id, req.objtype, req.objid, req.fieldtype, req.value, res.status))
                     
                     job.reply = writeStatus
                     job.event.set()
 
         finally:
             self.jobLock.release()
-            self.plog.info("Stop batch processing")
             
-            status.status = pss_pb2.SUCCEEDED
-            return status
+        status.status = pss_pb2.SUCCEEDED
+        return status
         
     
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     # how many workers is sufficient?
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=1000))
-    pss_pb2_grpc.add_pssServicer_to_server(PSSServicer(), server)
+    pss_pb2_grpc.add_pssServicer_to_server(PSSServicer(workingdir="data", case="data/case39"), server)
     server.add_insecure_port('[::]:50051')
     server.start()
     
