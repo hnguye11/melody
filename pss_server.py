@@ -13,10 +13,10 @@ REQUEST_LOG = "RLOG"
 PROCESS_LOG = "PLOG"
 
 class Job():
-    def __init__(self, request, reply, event):
+    def __init__(self, request, reply):
         self.request = request
         self.reply = reply
-        self.event = event
+        self.event = Event()
 
     
     def to_string(self):
@@ -38,15 +38,10 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
         self.jobLock.acquire()        
         for req in readRequest.request:
             self.rlog.info("%s,READ,%s,%s,%s,%s"%(readRequest.timestamp, req.id, req.objtype, req.objid, req.fieldtype))
-        event = Event()
-        job = Job(readRequest, None, event)
-        
-        try:
-            self.jobs.append(job)
-        finally:
-            self.jobLock.release()
-
-        event.wait()
+        job = Job(readRequest, None)
+        self.jobs.append(job)
+        self.jobLock.release()
+        job.event.wait()
         readResponse = job.reply
         
         return readResponse
@@ -56,44 +51,40 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
         self.jobLock.acquire()
         for req in writeRequest.request:
             self.rlog.info("%s,WRITE,%s,%s,%s,%s,%s"%(writeRequest.timestamp, req.id, req.objtype, req.objid, req.fieldtype, req.value))
-        event = Event()
-        job = Job(writeRequest, None, event)
-
-        try:
-            self.jobs.append(job)
-        finally:
-            self.jobLock.release()
-
-        event.wait()
+        job = Job(writeRequest, None)
+        self.jobs.append(job)
+        self.jobLock.release()
+        job.event.wait()
         writeStatus = job.reply
         
         return writeStatus
         
     
     def process(self, request, context):
-        self.jobLock.acquire()
-        self.plog.info("--------------------")
+        if len(self.jobs) == 0:
+            return pss_pb2.Status(id=request.id, status=pss_pb2.SUCCEEDED)
         
-        status = pss_pb2.Status()
-        status.id = request.id
-        
-        try:
+        else:
+            self.jobLock.acquire()
+            processStatus = pss_pb2.Status(id=request.id)
+            self.plog.info("--------------------")
+
             while len(self.jobs) > 0:
                 # Pop the earliest job from job list
                 timestamps = [float(job.request.timestamp) for job in self.jobs]
                 idx = timestamps.index(min(timestamps))
                 job = self.jobs.pop(idx)
                 request = job.request
-                
+
                 if type(request) == pss_pb2.ReadRequest:
                     readResponse = pss_pb2.ReadResponse()
-                    
+
                     for req in request.request:
                         res = readResponse.response.add()
                         res.id = req.id
                         res.value = self.mp.read(req.objtype, req.objid, req.fieldtype)
                         self.plog.info("%s,READ,%s,%s,%s,%s,%s"%(request.timestamp, req.id, req.objtype, req.objid, req.fieldtype, res.value))
-                    
+
                     job.reply = readResponse
                     job.event.set()
 
@@ -101,30 +92,28 @@ class PSSServicer(pss_pb2_grpc.pssServicer): # a.k.a. the Proxy
                     writelist = [(req.objtype, req.objid, req.fieldtype, req.value) for req in request.request]
                     self.mp.write_multiple(writelist)
                     self.mp.run_pf()
-                    
+
                     writeStatus = pss_pb2.WriteStatus()
-                    
+
                     for req in request.request:
                         res = writeStatus.status.add()
                         res.id = req.id
                         res.status = pss_pb2.SUCCEEDED # TODO: get write status from pss
                         self.plog.info("%s,WRITE,%s,%s,%s,%s,%s,%s"%(request.timestamp, req.id, req.objtype, req.objid, req.fieldtype, req.value, res.status))
-                    
+
                     job.reply = writeStatus
                     job.event.set()
-
-        finally:
+                    
             self.jobLock.release()
-            
-        status.status = pss_pb2.SUCCEEDED
-        return status
+            processStatus.status = pss_pb2.SUCCEEDED
+            return processStatus
         
     
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    # how many workers is sufficient?
+    logging.basicConfig(level=logging.DEBUG) #, filename="pss_server.log")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=1000))
-    pss_pb2_grpc.add_pssServicer_to_server(PSSServicer(workingdir="data", case="data/case39"), server)
+    pssServicer = PSSServicer(workingdir="data", case="data/case39")
+    pss_pb2_grpc.add_pssServicer_to_server(pssServicer, server)
     server.add_insecure_port('[::]:50051')
     server.start()
     
